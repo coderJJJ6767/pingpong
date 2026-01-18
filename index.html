@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- STUDENT: Our "Main Switch." It tells the browser that this is an HTML document. -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- STUDENT: This line makes sure the game looks good on phones and computers! -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Neon Ping Pong</title>
+    <!-- STUDENT: This link connects our "Skeleton" (HTML) to our "Clothing" (CSS). 
+         Without this, the game would look like plain black text! -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- STUDENT: The "Game Container" is the "Stage" for our game. 
+         It holds the menu, the board, and the score. -->
+    <div id="game-container">
+
+        <!-- STUDENT: The "Start Screen" is our first overlay. 
+             It's like the title screen of a video game. -->
+        <div id="menu-screen" class="overlay">
+            <h1>RETRO PONG</h1>
+            <p>Select your difficulty to start:</p>
+            <div class="button-group">
+                <!-- STUDENT: These buttons are how the player talks to the game.
+                     Each "id" is like a unique name tag for the JavaScript to find later. -->
+                <button id="btn-easy">EASY</button>
+                <button id="btn-normal">NORMAL</button>
+                <button id="btn-hard">HARD</button>
+                <button id="btn-expert">EXPERT</button>
+            </div>
+        </div>
+
+        <!-- STUDENT: The HUD (Heads-Up Display) shows the score. 
+             It stays on top while we play. -->
+        <div id="hud" class="hidden">
+            <div class="score-board">
+                <span id="player-score">0</span>
+                <span>:</span>
+                <span id="ai-score">0</span>
+            </div>
+        </div>
+
+        <!-- STUDENT: The "Canvas" is our Digital Chalkboard. 
+             This is where the magic happens! We will draw the ball and paddles here. -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- STUDENT: The "Game Over Screen" only appears when someone wins. -->
+        <div id="game-over-screen" class="overlay hidden">
+            <h2 id="winner-text">PLAYER WINS!</h2>
+            <button id="btn-restart">PLAY AGAIN</button>
+            <button id="btn-main-menu">MAIN MENU</button>
+        </div>
+
+    </div>
+
+    <!-- STUDENT: This tag connects our "Skeleton" (HTML) to our "Brain" (JavaScript).
+         We put it at the bottom so the skeleton is built BEFORE the brain starts thinking. -->
+    <script src="game.js"></script>
+</body>
+
+</html>
