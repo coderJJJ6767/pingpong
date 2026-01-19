@@ -35,12 +35,14 @@ window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 let gameRunning = false;
 let ballMoving = false;
 let currentDifficulty = 'NORMAL';
+let boundaryGlow = 0; // 0 to 1, for the neon animation
+let lastBallX = 0;
 
 // STUDENT: Speeds are now "Pixels per Second" instead of "Pixels per Frame".
 // This makes the game run the same speed on iPads and fast PCs!
 const difficulties = {
-    'EASY': { ballSpeed: 350, aiSpeed: 300, errorPercent: 50 },
-    'NORMAL': { ballSpeed: 450, aiSpeed: 400, errorPercent: 25 },
+    'EASY': { ballSpeed: 350, aiSpeed: 275, errorPercent: 50 },
+    'NORMAL': { ballSpeed: 450, aiSpeed: 390, errorPercent: 25 },
     'HARD': { ballSpeed: 700, aiSpeed: 600, errorPercent: 10 },
     'EXPERT': { ballSpeed: 900, aiSpeed: 900, errorPercent: 0 }
 };
@@ -65,14 +67,36 @@ resize();
 player.y = canvas.height / 2 - paddleHeight / 2;
 ai.y = canvas.height / 2 - paddleHeight / 2;
 
-// ... (drawRect, drawCircle stay same) ...
+// STUDENT: Helper functions to draw shapes easily!
+function drawRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+}
+
+function drawCircle(x, y, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2, false);
+    ctx.closePath();
+    ctx.fill();
+}
 
 function draw() {
     drawRect(0, 0, canvas.width, canvas.height, '#004411');
 
+    // Draw the center boundary with a neon glow
+    ctx.shadowBlur = 10 + (boundaryGlow * 20); // Make it pop!
+    ctx.shadowColor = '#00ff66';
+
+    // Increase thickness during animation
+    let lineWidth = 2 + (boundaryGlow * 4);
+
     for (let i = 0; i < canvas.height; i += 40) {
-        drawRect(canvas.width / 2 - 1, i, 2, 20, '#00ff66');
+        drawRect(canvas.width / 2 - (lineWidth / 2), i, lineWidth, 20, '#00ff66');
     }
+
+    // Reset shadow for other objects
+    ctx.shadowBlur = 0;
 
     drawRect(player.x, player.y, paddleWidth, paddleHeight, '#00ff66');
     drawRect(ai.x, ai.y, paddleWidth, paddleHeight, '#ff0066');
@@ -115,6 +139,19 @@ function update(dt) {
     ball.x += ball.speedX * dt;
     ball.y += ball.speedY * dt;
 
+    // ANIMATION: Detect when the ball crosses the center boundary
+    let centerX = canvas.width / 2;
+    if ((lastBallX < centerX && ball.x >= centerX) || (lastBallX > centerX && ball.x <= centerX)) {
+        boundaryGlow = 1.0; // Trigger the pop!
+    }
+    lastBallX = ball.x;
+
+    // Decay the glow animation
+    if (boundaryGlow > 0) {
+        boundaryGlow -= dt * 2; // Fades out over 0.5 seconds
+        if (boundaryGlow < 0) boundaryGlow = 0;
+    }
+
     if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
         ball.speedY = -ball.speedY;
     }
@@ -146,7 +183,6 @@ function update(dt) {
     }
 }
 
-// ... (checkWin, startGame stay mostly same) ...
 
 function startGame(difficulty) {
     currentDifficulty = difficulty;
@@ -162,6 +198,7 @@ function startGame(difficulty) {
     document.getElementById('menu-screen').classList.add('hidden');
     document.getElementById('game-over-screen').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('difficulty-display').innerText = difficulty + " MODE";
 
     resetBall();
 }

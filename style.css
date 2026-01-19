@@ -75,6 +75,13 @@ canvas {
     text-shadow: 0 0 10px #00ff66;
 }
 
+#difficulty-display {
+    font-size: 14px;
+    letter-spacing: 2px;
+    opacity: 0.8;
+    margin-top: 5px;
+}
+
 /* STUDENT: Styling our buttons to look like arcade buttons. */
 button {
     background-color: transparent;
