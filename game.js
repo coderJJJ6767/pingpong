@@ -157,11 +157,17 @@ function update(dt) {
     }
 
     let aiSpeed = difficulties[currentDifficulty].aiSpeed;
+    let errorLevel = difficulties[currentDifficulty].errorPercent;
     let aiPaddleCenter = ai.y + paddleHeight / 2;
 
-    if (aiPaddleCenter < ball.y - 10) {
+    // STUDENT: We use "errorPercent" to make the AI less perfect.
+    // On EASY, the "deadZone" is huge (35px), so the AI is slow to react.
+    // On EXPERT, the "deadZone" is small (10px), so it tracks perfectly.
+    let deadZone = 10 + (errorLevel * 0.5);
+
+    if (aiPaddleCenter < ball.y - deadZone) {
         ai.y += aiSpeed * dt;
-    } else if (aiPaddleCenter > ball.y + 10) {
+    } else if (aiPaddleCenter > ball.y + deadZone) {
         ai.y -= aiSpeed * dt;
     }
 

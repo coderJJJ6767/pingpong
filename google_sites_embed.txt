@@ -119,10 +119,10 @@ let player = { x: 20, y: 0, score: 0 };
 let ai = { x: 0, y: 0, score: 0 };
 
 const difficulties = {
-    'EASY': { ballSpeed: 350, aiSpeed: 275 },
-    'NORMAL': { ballSpeed: 450, aiSpeed: 390 },
-    'HARD': { ballSpeed: 700, aiSpeed: 600 },
-    'EXPERT': { ballSpeed: 900, aiSpeed: 900 }
+    'EASY': { ballSpeed: 350, aiSpeed: 275, errorPercent: 50 },
+    'NORMAL': { ballSpeed: 450, aiSpeed: 390, errorPercent: 25 },
+    'HARD': { ballSpeed: 700, aiSpeed: 600, errorPercent: 10 },
+    'EXPERT': { ballSpeed: 900, aiSpeed: 900, errorPercent: 0 }
 };
 
 function resize() {
@@ -185,8 +185,9 @@ function update(dt) {
 
     if (ball.y < 0 || ball.y > canvas.height) ball.speedY = -ball.speedY;
     let aiCenter = ai.y + paddleHeight/2;
-    if (aiCenter < ball.y - 10) ai.y += difficulties[currentDifficulty].aiSpeed * dt;
-    else if (aiCenter > ball.y + 10) ai.y -= difficulties[currentDifficulty].aiSpeed * dt;
+    let deadZone = 10 + (difficulties[currentDifficulty].errorPercent * 0.5);
+    if (aiCenter < ball.y - deadZone) ai.y += difficulties[currentDifficulty].aiSpeed * dt;
+    else if (aiCenter > ball.y + deadZone) ai.y -= difficulties[currentDifficulty].aiSpeed * dt;
     let p = (ball.speedX < 0) ? player : ai;
     if (ball.x + 10 > p.x && ball.x - 10 < p.x + paddleWidth && ball.y + 10 > p.y && ball.y - 10 < p.y + paddleHeight) {
         ball.speedX = -ball.speedX * 1.1;
