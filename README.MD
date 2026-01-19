@@ -269,6 +269,56 @@ function resetBall() {
 
 ---
 
+## 📱 Chapter 11: Touch Support (Mobile)
+A computer uses a "Mouse" click, but a phone uses a "Touch." In code, these are different events.
+
+### Key Concept: `touchmove`
+Just like `mousemove` tracks the cursor, `touchmove` tracks your finger.
+```javascript
+canvas.addEventListener('touchmove', (event) => {
+    let touch = event.touches[0]; // The first finger touching the screen
+    let mouseY = touch.clientY - rect.top;
+    player.y = mouseY - paddleHeight / 2;
+});
+```
+
+### Key Concept: `preventDefault`
+On a phone, if you slide your finger down, the whole webpage usually scrolls. We don't want that during a game! `event.preventDefault()` tells the phone: *"Don't scroll the page, just move my paddle!"*
+
+---
+
+## ⏱️ Chapter 12: Delta Time (Consistent Speed)
+Why did the ball move slowly on an iPad but fast on a PC? It's all about **Frame Rate**.
+
+### Pixels per Frame vs. Pixels per Second
+If you tell a ball to move 5 pixels every time the screen refreshes:
+*   On a **60Hz** screen, it moves 300 pixels per second.
+*   On a **120Hz** iPad, it might move 600 pixels per second!
+*   If the computer is laggy and drops to **30Hz**, it moves only 150 pixels per second.
+
+### The Solution: Delta Time (dt)
+We calculate how many seconds passed since the last frame and multiply our speed by that number.
+```javascript
+// Movement = Speed (pixels per second) * Time (seconds)
+ball.x += ball.speedX * dt;
+```
+Now, if your game lags, `dt` gets bigger. If your game is fast, `dt` gets smaller. The result? The ball travels the same distance in one second regardless of the device!
+
+---
+
+## 📺 Chapter 13: Responsive Design (Fullscreen)
+A "Responsive" game changes its size to fit any screen (Phone, iPad, or Wide Monitor).
+
+### CSS Viewport Units
+We used `vw` (Viewport Width) and `vh` (Viewport Height).
+*   `100vw` means "Use 100% of the screen's width."
+*   `5vw` means "Make this text a size that is 5% of the screen's width."
+
+### The Resize Event
+Whenever you rotate your iPad or resize your browser window, JavaScript triggers a `resize` event. We use this to tell our "Digital Chalkboard" (Canvas) to stretch to its new size instantly.
+
+---
+
 ## 🎓 Graduation
 You have now built a complete game engine using Physics, AI, Collision Detection, and State Management. These are the exact same concepts used in massive games like *Mario* or *Fortnite*, just in 2D!
 

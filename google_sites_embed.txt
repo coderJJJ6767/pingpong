@@ -1,0 +1,237 @@
+<!-- 
+    🏓 GOOGLE SITES EMBED CODE (FULLSCREEN VERSION) 🏓
+    Copy EVERYTHING below this line and paste it into the "Embed code" box in Google Sites!
+-->
+
+<style>
+body {
+    background-color: #1a1a1a;
+    color: #00ff66;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    height: -webkit-fill-available;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: none; /* Tells the browser: "I handle touch, don't scroll!" */
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+canvas {
+    background-color: #004411;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+#hud {
+    position: absolute;
+    top: 5%;
+    width: 100%;
+    text-align: center;
+    font-size: 6vw;
+    font-weight: bold;
+    z-index: 5;
+    pointer-events: none;
+    text-shadow: 0 0 10px #00ff66;
+}
+
+button {
+    background-color: transparent;
+    color: #00ff66;
+    border: 2px solid #00ff66;
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 4vw;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.hidden { display: none !important; }
+h1 { font-size: 10vw; text-shadow: 0 0 10px #00ff66; margin: 10px; }
+h2 { font-size: 8vw; }
+</style>
+
+<div id="game-container">
+    <div id="menu-screen" class="overlay">
+        <h1>RETRO PONG</h1>
+        <p>Select Difficulty:</p>
+        <button id="btn-easy">EASY</button>
+        <button id="btn-normal">NORMAL</button>
+        <button id="btn-hard">HARD</button>
+        <button id="btn-expert">EXPERT</button>
+    </div>
+    <div id="hud" class="hidden">
+        <span id="player-score">0</span> : <span id="ai-score">0</span>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <div id="game-over-screen" class="overlay hidden">
+        <h2 id="winner-text">PLAYER WINS!</h2>
+        <button id="btn-restart">PLAY AGAIN</button>
+        <button id="btn-main-menu">MAIN MENU</button>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+
+let gameRunning = false;
+let currentDifficulty = 'NORMAL';
+const paddleWidth = 15;
+const paddleHeight = 100;
+
+let ball = { x: 0, y: 0, radius: 10, speedX: 0, speedY: 0, color: '#ffffff' };
+let player = { x: 20, y: 0, score: 0 };
+let ai = { x: 0, y: 0, score: 0 };
+
+const difficulties = {
+    'EASY': { ballSpeed: 350, aiSpeed: 300 },
+    'NORMAL': { ballSpeed: 450, aiSpeed: 400 },
+    'HARD': { ballSpeed: 700, aiSpeed: 600 },
+    'EXPERT': { ballSpeed: 900, aiSpeed: 900 }
+};
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    if (window.visualViewport) {
+        canvas.width = window.visualViewport.width;
+        canvas.height = window.visualViewport.height;
+    }
+    player.x = 20;
+    ai.x = canvas.width - paddleWidth - 20;
+    player.y = Math.min(player.y, canvas.height - paddleHeight);
+    ai.y = Math.min(ai.y, canvas.height - paddleHeight);
+}
+window.addEventListener('resize', () => setTimeout(resize, 100));
+window.addEventListener('orientationchange', () => setTimeout(resize, 200));
+resize();
+
+player.y = canvas.height/2 - paddleHeight/2;
+ai.y = canvas.height/2 - paddleHeight/2;
+
+function draw() {
+    ctx.fillStyle = '#004411';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff66';
+    for (let i = 0; i < canvas.height; i += 40) ctx.fillRect(canvas.width/2 - 1, i, 2, 20);
+    ctx.fillRect(player.x, player.y, paddleWidth, paddleHeight);
+    ctx.fillStyle = '#ff0066';
+    ctx.fillRect(ai.x, ai.y, paddleWidth, paddleHeight);
+    ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fill();
+}
+
+function resetBall() {
+    const diff = difficulties[currentDifficulty];
+    ball.x = canvas.width/2; ball.y = canvas.height/2;
+    ball.speedX = 0; ball.speedY = 0;
+    setTimeout(() => {
+        if (gameRunning) {
+            ball.speedX = (Math.random() > 0.5) ? -diff.ballSpeed : diff.ballSpeed;
+            ball.speedY = (Math.random() > 0.5) ? -diff.ballSpeed : diff.ballSpeed;
+        }
+    }, 1000);
+}
+
+function update(dt) {
+    if (!gameRunning) return;
+    ball.x += ball.speedX * dt; ball.y += ball.speedY * dt;
+    if (ball.y < 0 || ball.y > canvas.height) ball.speedY = -ball.speedY;
+    let aiCenter = ai.y + paddleHeight/2;
+    if (aiCenter < ball.y - 10) ai.y += difficulties[currentDifficulty].aiSpeed * dt;
+    else if (aiCenter > ball.y + 10) ai.y -= difficulties[currentDifficulty].aiSpeed * dt;
+    let p = (ball.speedX < 0) ? player : ai;
+    if (ball.x + 10 > p.x && ball.x - 10 < p.x + paddleWidth && ball.y + 10 > p.y && ball.y - 10 < p.y + paddleHeight) {
+        ball.speedX = -ball.speedX * 1.1;
+    }
+    if (ball.x < 0) { ai.score++; document.getElementById('ai-score').innerText = ai.score; checkWin(); }
+    if (ball.x > canvas.width) { player.score++; document.getElementById('player-score').innerText = player.score; checkWin(); }
+}
+
+function checkWin() {
+    if (player.score >= 10 || ai.score >= 10) {
+        gameRunning = false;
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.remove('hidden');
+        document.getElementById('winner-text').innerText = player.score >= 10 ? "PLAYER WINS!" : "COMPUTER WINS!";
+    } else resetBall();
+}
+
+function startGame(d) {
+    currentDifficulty = d; player.score = 0; ai.score = 0;
+    document.getElementById('player-score').innerText = 0; document.getElementById('ai-score').innerText = 0;
+    player.y = canvas.height/2 - paddleHeight/2;
+    ai.y = canvas.height/2 - paddleHeight/2;
+    gameRunning = true;
+    document.getElementById('menu-screen').classList.add('hidden');
+    document.getElementById('game-over-screen').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    resetBall();
+}
+
+window.onmousemove = (e) => {
+    if (!gameRunning) return;
+    let r = canvas.getBoundingClientRect();
+    player.y = (e.clientY - r.top) * (canvas.height/r.height) - paddleHeight/2;
+};
+window.ontouchmove = (e) => {
+    if (!gameRunning) return;
+    if (e.cancelable) e.preventDefault();
+    let r = canvas.getBoundingClientRect();
+    player.y = (e.touches[0].clientY - r.top) * (canvas.height/r.height) - paddleHeight/2;
+};
+window.ontouchstart = (e) => {
+    if (e.target === canvas && e.cancelable) e.preventDefault();
+};
+window.ontouchend = (e) => {
+    if (e.target === canvas && e.cancelable) e.preventDefault();
+};
+
+document.getElementById('btn-easy').onclick = () => startGame('EASY');
+document.getElementById('btn-normal').onclick = () => startGame('NORMAL');
+document.getElementById('btn-hard').onclick = () => startGame('HARD');
+document.getElementById('btn-expert').onclick = () => startGame('EXPERT');
+document.getElementById('btn-restart').onclick = () => startGame(currentDifficulty);
+document.getElementById('btn-main-menu').onclick = () => {
+    document.getElementById('game-over-screen').classList.add('hidden');
+    document.getElementById('menu-screen').classList.remove('hidden');
+};
+
+let lastTime = 0;
+function loop(t) {
+    let dt = (t - lastTime) / 1000;
+    if (dt > 0.1) dt = 0.016;
+    lastTime = t;
+    update(dt); draw(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>

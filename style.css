@@ -3,43 +3,43 @@
    It tells the browser how things should look (colors, sizes, positions).
 */
 
-/* STUDENT: The * body * tag is the background of the whole website. 
-   We want it to be dark like a real 80s arcade room! */
+html,
 body {
     background-color: #1a1a1a;
-    /* A very dark grey/black */
     color: #00ff66;
-    /* Our signature Neon Green */
     font-family: 'Courier New', Courier, monospace;
-    /* This font feels like an old computer. */
-
-    /* STUDENT: Flexbox is a "Magic Tool" for centering things on the screen. */
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    height: -webkit-fill-available;
+    /* Fill the visible area on iOS */
+    position: absolute;
+    /* Better for embedded iframes */
+    top: 0;
+    left: 0;
     display: flex;
     justify-content: center;
-    /* Centers horizontal (Left to Right) */
     align-items: center;
-    /* Centers vertical (Top to Bottom) */
-
-    height: 100vh;
-    /* Makes the body the full height of the screen */
-    margin: 0;
-    overflow: hidden;
-    /* This stops the page from having scrollbars if the game is big. */
+    touch-action: none;
 }
 
-/* STUDENT: The "Game Container" is the physical border of our machine. */
 #game-container {
     position: relative;
-    border: 4px solid #00ff66;
-    box-shadow: 0 0 20px #00ff66;
-    /* This is the "Neon Glow" effect! */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+    /* STUDENT: We removed the border so it feels like a real fullscreen TV. */
 }
 
-/* STUDENT: The Canvas is our play area. We make it green. */
 canvas {
     background-color: #004411;
-    /* Dark green "field" */
     display: block;
+    width: 100%;
+    height: 100%;
+    /* STUDENT: This makes the canvas stretch to fit the screen! */
 }
 
 /* STUDENT: An .overlay is used for menus. 
@@ -63,14 +63,16 @@ canvas {
 /* STUDENT: The HUD (Scoreboard) is at the top. */
 #hud {
     position: absolute;
-    top: 20px;
+    top: 5%;
     width: 100%;
     text-align: center;
-    font-size: 30px;
+    font-size: 5vw;
+    /* STUDENT: vw means "Viewport Width". It scales with the screen! */
     font-weight: bold;
     z-index: 5;
     pointer-events: none;
-    /* Make sure we can't accidentally click the score */
+    color: #00ff66;
+    text-shadow: 0 0 10px #00ff66;
 }
 
 /* STUDENT: Styling our buttons to look like arcade buttons. */
@@ -101,6 +103,11 @@ button:hover {
 }
 
 h1 {
-    font-size: 50px;
+    font-size: 8vw;
     text-shadow: 0 0 10px #00ff66;
+    margin: 20px;
+}
+
+h2 {
+    font-size: 6vw;
 }
