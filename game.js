@@ -152,7 +152,11 @@ function update(dt) {
         if (boundaryGlow < 0) boundaryGlow = 0;
     }
 
-    if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+    if (ball.y - ball.radius < 0) {
+        ball.y = ball.radius; // Snap to top
+        ball.speedY = -ball.speedY;
+    } else if (ball.y + ball.radius > canvas.height) {
+        ball.y = canvas.height - ball.radius; // Snap to bottom
         ball.speedY = -ball.speedY;
     }
 
@@ -171,11 +175,21 @@ function update(dt) {
         ai.y -= aiSpeed * dt;
     }
 
+    // STUDENT: Clamp AI paddle within boundaries
+    ai.y = Math.max(0, Math.min(canvas.height - paddleHeight, ai.y));
+
     let playerOrAi = (ball.speedX < 0) ? player : ai;
 
     if (collision(ball, playerOrAi)) {
         ball.speedX = -ball.speedX;
         ball.speedX *= 1.1;
+
+        // Fix "digging in": Snap the ball to the front of the paddle
+        if (playerOrAi === player) {
+            ball.x = player.x + paddleWidth + ball.radius;
+        } else {
+            ball.x = ai.x - ball.radius;
+        }
     }
 
     if (ball.x - ball.radius < 0) {
@@ -230,7 +244,10 @@ canvas.addEventListener('mousemove', (event) => {
 
     // Scale mouseY based on internal canvas resolution vs screen size
     let scaleY = canvas.height / rect.height;
-    player.y = (mouseY * scaleY) - paddleHeight / 2;
+    let targetY = (mouseY * scaleY) - paddleHeight / 2;
+
+    // STUDENT: Clamp player paddle within boundaries
+    player.y = Math.max(0, Math.min(canvas.height - paddleHeight, targetY));
 });
 
 canvas.addEventListener('touchmove', (event) => {
@@ -241,7 +258,10 @@ canvas.addEventListener('touchmove', (event) => {
 
     let scaleY = canvas.height / rect.height;
     let mouseY = (touch.clientY - rect.top) * scaleY;
-    player.y = mouseY - paddleHeight / 2;
+    let targetY = mouseY - paddleHeight / 2;
+
+    // STUDENT: Clamp player paddle within boundaries
+    player.y = Math.max(0, Math.min(canvas.height - paddleHeight, targetY));
 }, { passive: false });
 
 // STUDENT: We also add start/end listeners to be extra sure the iPad doesn't scroll!
